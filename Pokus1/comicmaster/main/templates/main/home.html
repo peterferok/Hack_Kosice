@@ -1,13 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Master</title>
-</head>
-<body>
-    <h1>Very nice my {{ user.get_username }}</h1>
-    <a href="/account/logout">Logout my boii</a>
-</body>
-</html>
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'account/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="root">
+    <div style="text-align: right; margin-right: 10%;">
+        <h1>Fellow comic enthusiast!</h1>
+        <p>First, answer some questions about your artwork idea</p>
+    </div>
+    <section>
+		<div class="container">
+			<div class="card">
+				<div class="content">
+					<div class="imgBx">
+						<img src="{% static 'account/img/story.png' %}">
+					</div>
+					<div class="contentBx">
+						<h3>What<br><span>Story of yours comic</span></h3>
+					</div>
+                    <textarea id="textarea"></textarea>
+				</div>
+			</div>
+			<div class="card">
+				<div class="content">
+					<div class="imgBx">
+						<img src="{% static 'account/img/hero.png' %}">
+					</div>
+					<div class="contentBx">
+						<h3>Who<br><span>Hero of your comic</span></h3>
+					</div>
+                    <select name="" id="">
+                        <option value="">Batman</option>
+                        <option value="">Superman</option>
+                    </select>
+				</div>
+			</div>
+			<div class="card">
+				<div class="content">
+					<div class="imgBx">
+						<img src="{% static 'account/img/style.png' %}">
+					</div>
+					<div class="contentBx">
+						<h3>How<br><span>Artstyle of your work</span></h3>
+					</div>
+                    <select name="" id="">
+                        <option value="">Western comic</option>
+                        <option value="">Eastern manga</option>
+                    </select>
+				</div>
+			</div>
+            <button id="first_submit" type="submit"><strong>Submit your answers</strong></button>
+		</div>
+	</section>
+</div>
+
+
+{% endblock %}
