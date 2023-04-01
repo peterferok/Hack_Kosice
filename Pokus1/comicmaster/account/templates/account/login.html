@@ -1,0 +1,43 @@
+{% extends 'account/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'account/css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="root">
+  <div class="login-form">
+    <form method="post" action="">
+      {% csrf_token %}
+      <h1 style="color: #2d3b55;">Make your comic!</h1>
+      <div class="content">
+        <div class="input-field">
+          <input type="email" name="email" placeholder="Email">
+        </div>
+        <div class="input-field">
+          <input type="password" name="password" placeholder="Password" autocomplete="new-password">
+        </div>
+        {% for message in messages %}
+          <p class="message {{ message.tags }}" style="color: red;">{{ message }}</p>
+        {% endfor %}
+        <button type="button" style="background: none; border: none;" onclick="Lol()">FORGOT YOUR PASSWORD?</button>
+        <p id="lol" style="color: palevioletred;"></p>
+      </div>
+      <div class="action">
+        <button type="button"><a href="/account/register" style="color: #2d3b55; text-decoration: none;">Register</a></button>
+        <button type="submit">Log in</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function Lol(){
+    let lol = document.getElementById('lol')
+    lol.innerText = "LoL, good luck next time XD"
+  }
+</script>
+
+{% endblock %}
