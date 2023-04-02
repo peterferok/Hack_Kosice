@@ -9,3 +9,30 @@ img {
     justify-content: center; 
     margin: 20vh;
 }
+
+.control {
+    display: flex; 
+    align-items: center; 
+    justify-content: space-evenly;
+}
+
+#continue, #download {
+    margin: 20px 0;
+    border-radius: 8px;
+    background-color: #DA22FF !important;
+    border: 2px solid #9733EE !important;
+    color: black;
+    font-size: 20px;
+    font-size: 16px;
+    font-weight: 200;
+    letter-spacing: 1px;
+    padding: 13px 20px 13px;
+    outline: 0;
+    border: 1px solid black;
+    cursor: pointer;
+    position: relative;
+    background-color: rgba(0, 0, 0, 0);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
