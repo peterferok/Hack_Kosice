@@ -20,8 +20,8 @@ import re
 import base64
 import requests
 
-OPENAI_API_KEY = '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'
-DEEPL_KEY = 'e99c10de-a8be-0424-85e8-3e4a485c0755:fx'
+OPENAI_API_KEY = 'key'
+DEEPL_KEY = 'key'
 responses = []
 detected_language = ''
 
