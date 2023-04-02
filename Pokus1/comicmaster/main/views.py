@@ -39,10 +39,13 @@ class HomeView(LoginRequiredMixin, View):
         prompt = request.POST.get('prompt')
 
         index = request.POST.get('index')
+
         if index == None:
             index = 0
         else:
             index = int(index)
+            if index >= 5:
+                return HttpResponse("You did it!")
 
         panels = request.POST.get('panels')
         if panels == None:
