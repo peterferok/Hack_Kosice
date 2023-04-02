@@ -11,8 +11,8 @@
     <div class="final">
         <h1>Behold! Your artwork!</h1>
         <div class="control">
-            <button id="continue">Continue creating</button>
-            <button id="download">Download</button>
+            <a href="/"><button id="continue">Continue creating</button></a>
+            <a href="{% static 'account/img/Concat_images.jpg' %}" download="ComicPage"><button id="download">Download</button></a>
         </div>
         <img src="{% static 'account/img/Concat_images.jpg' %}">
     </div>
