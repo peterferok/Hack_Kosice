@@ -9,10 +9,10 @@
     {% load static %}
     <nav>
       <div>
-        <p><strong>Very nice my {{ user.get_username }}</strong></p>
+        <p><strong>Logged in as {{ user.get_username }}</strong></p>
       </div>
       <div>
-        <img style="width: 30px;" src="{% static 'account/img/Logout.png' %}"><a href="/account/logout"> <strong>Logout my boii</strong></a>
+        <img style="width: 30px;" src="{% static 'account/img/Logout.png' %}"><a href="/account/logout"> <strong>Logout</strong></a>
       </div>
     </nav>
 

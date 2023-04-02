@@ -179,6 +179,10 @@ section::before {
 	text-transform: initial;
 }
 
+.hidden {
+  display: none;
+}
+
 
 #first_submit {
   align-items: center;

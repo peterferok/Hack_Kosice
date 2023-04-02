@@ -14,8 +14,10 @@
         <p>First, answer some questions about your artwork idea</p>
     </div>
     <section>
+        <form method="post" action="">
+        {% csrf_token %}
 		<div class="container">
-			<div class="card">
+			<div class="card hidden">
 				<div class="content">
 					<div class="imgBx">
 						<img src="{% static 'account/img/story.png' %}">
@@ -23,7 +25,7 @@
 					<div class="contentBx">
 						<h3>What<br><span>Story of yours comic</span></h3>
 					</div>
-                    <textarea id="textarea"></textarea>
+                    <textarea id="textarea" name="story"></textarea>
 				</div>
 			</div>
 			<div class="card">
@@ -34,9 +36,9 @@
 					<div class="contentBx">
 						<h3>Who<br><span>Hero of your comic</span></h3>
 					</div>
-                    <select name="" id="">
-                        <option value="">Batman</option>
-                        <option value="">Superman</option>
+                    <select name="hero" id="">
+                        <option value="Batman">Batman</option>
+                        <option value="Superman">Superman</option>
                     </select>
 				</div>
 			</div>
@@ -48,14 +50,15 @@
 					<div class="contentBx">
 						<h3>How<br><span>Artstyle of your work</span></h3>
 					</div>
-                    <select name="" id="">
-                        <option value="">Western comic</option>
-                        <option value="">Eastern manga</option>
+                    <select name="style" id="">
+                        <option value="comic">Western comic</option>
+                        <option value="manga">Eastern manga</option>
                     </select>
 				</div>
 			</div>
             <button id="first_submit" type="submit"><strong>Submit your answers</strong></button>
 		</div>
+        </form>
 	</section>
 </div>
 
