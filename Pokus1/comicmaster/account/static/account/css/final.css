@@ -1,0 +1,11 @@
+img {
+    box-shadow: 6px 6px 30px rgb(0, 0, 0);
+}
+
+.final {
+    display: flex; 
+    flex-direction: column;
+    text-align: center; 
+    justify-content: center; 
+    margin: 20vh;
+}

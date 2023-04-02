@@ -72,12 +72,24 @@ textarea, select {
   margin-top: 5vh;
 }
 
+#img_options img{
+  width: 10vw;
+  margin: 5px;
+}
+
 #header {
   display: flex;
   text-align: center; 
   align-items: center; 
   justify-content: space-between;
   margin: 0 8%;
+}
+
+#promptinput {
+  margin: 10px;
+  padding: 5px;
+  border-radius: 8px;
+  width: 100%
 }
 
 section::before {

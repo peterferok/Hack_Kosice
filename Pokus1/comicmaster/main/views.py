@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+import cv2
+import numpy as np
 import json
 import os
 from pathlib import Path
@@ -16,6 +18,7 @@ from diffusers import StableDiffusionImageVariationPipeline
 import torch
 import re
 import base64
+import requests
 
 OPENAI_API_KEY = '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'
 DEEPL_KEY = 'e99c10de-a8be-0424-85e8-3e4a485c0755:fx'
@@ -24,6 +27,28 @@ detected_language = ''
 
 
 # Create your views here.
+class FinalView(LoginRequiredMixin, View):
+    login_url = '/account'
+
+    def get(self, request):
+        img1 = cv2.imread('~/../account/static/account/img/actual0.jpg')
+        img2 = cv2.imread('~/../account/static/account/img/actual1.jpg')
+        img3 = cv2.imread('~/../account/static/account/img/actual2.jpg')
+        img4 = cv2.imread('~/../account/static/account/img/actual3.jpg')
+        img5 = cv2.imread('~/../account/static/account/img/actual4.jpg')
+        end = cv2.imread('~/../account/static/account/img/end_chapter.jpg')
+
+        resized_end = cv2.resize(end,(img5.shape[1],img5.shape[0]))
+        #print(resized_end.shape)
+        #print(img1.shape)
+        im_h1 = cv2.hconcat([img1, img2])
+        im_h2 = cv2.hconcat([img3, img4])
+        im_h3 = cv2.hconcat([img5,resized_end])
+        im_v = cv2.vconcat([im_h1, im_h2,im_h3])
+        cv2.imwrite('~/../account/static/account/img/Concat_images.jpg', im_v)
+        return render(request, "main/final.html", {})
+
+
 class HomeView(LoginRequiredMixin, View):
     login_url = '/account'
 
@@ -31,21 +56,78 @@ class HomeView(LoginRequiredMixin, View):
         return render(request, "main/home.html", {})
 
     def post(self, request):
-        story = request.POST['story']
-        hero = request.POST['hero']
-        style = request.POST['style']
-        panels = main(story, style, hero)
+        story = request.POST.get('story')
+        hero = request.POST.get('hero')
+        style = request.POST.get('style')
+        my_prompt = None
+        prompt = request.POST.get('prompt')
 
-        response = []
+        index = request.POST.get('index')
 
-        for panel in panels:
-            response.append(getImage(panel['art'] + " in a " + style + " style no text", panel['narration'],OPENAI_API_KEY))
+        if index == None:
+            index = 0
+        else:
+            index = int(index)
+            if index >= 5:
+                return redirect('final/')
 
-        return render(request, "main/images.html", {'data': response})
+        panels = request.POST.get('panels')
+        if panels == None:
+            panels = main(story, style, hero)
+        else:
+            panels = panels.replace('\'', '"')
+            for i in range(len(panels)):
+                if panels[i] == '"':
+                    if panels[i+1] in ['s', 'd', 'r'] and i != 0:
+                        if panels[i-1] not in [' ', '{']:
+                            temp = list(panels)
+                            temp[i] = ' '
+                            panels = ''.join(temp)
+            print(panels)
+            panels = json.loads(panels)
+    
+        chosen = request.POST.get('chosen')
+        if chosen != None:
+            for i in range(5):
+                if i != int(chosen):
+                    try:
+                        os.remove('~/../account/static/account/img/current' + str(i) + '.jpg')
+                    except FileNotFoundError:
+                        pass
+                else:
+                    img_data = None
+                    with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'rb') as handler:
+                        img_data = handler.read()
+                    try:
+                        os.remove('~/../account/static/account/img/current' + str(i) + '.jpg')
+                    except FileNotFoundError:
+                        pass
+                    with open('~/../account/static/account/img/actual' + str(index) + '.jpg', 'wb') as handler:
+                        handler.write(img_data)
+            index += 1
+            prompt = None
 
+        if prompt is not None:
+            my_prompt = prompt + " in a "+style+" style no text"
+        else:
+            print(index)
+            my_prompt = panels[index]['art']+" in a "+style+" style no text"
+
+
+        for i in range(5):
+            data, prompt = getImage(my_prompt, OPENAI_API_KEY)
+            
+            img_data = requests.get(data).content
+            with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'wb') as handler:
+                handler.write(img_data)
+            
+            insert_narration('~/../account/static/account/img/current' + str(i) + '.jpg', panels[int(index)]['narration'])
+        
+        return render(request, "main/images.html", {'prompt': prompt, 'index': index, 'panels': panels, 'style': style})
+    
 
 def insert_narration(image_path, text):
-    narration_box_path = 'resources/narrationbox.png'
+    narration_box_path = '~/../account/static/account/img/narrationbox.png'
 
     # Load the image from file
     narration_image = Image.open(narration_box_path)
@@ -98,7 +180,12 @@ def insert_narration(image_path, text):
     combined_image.save(image_path, 'PNG')
 
 
-def getImage(prompts, narration, apiKey):
+class ImagesView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, "main/images.html", {})
+        
+
+def getImage(prompts, apiKey):
     DATA_DIR = Path.cwd() / "responses"
 
     DATA_DIR.mkdir(exist_ok=True)
@@ -108,25 +195,23 @@ def getImage(prompts, narration, apiKey):
     response = openai.Image.create(
         prompt=prompts,
         n=1,
-        size="256x256",
-        response_format="b64_json",
+        size="256x256"
     )
 
-    file_name = DATA_DIR / f"{prompts[:1]}-{response['created']}.json"
+    #file_name = DATA_DIR / f"{prompts[:1]}-{response['created']}.json"
 
-    #    with open(file_name, mode="w", encoding="utf-8") as file:
-    #        json.dump(response, file)
-    images = []
-    for index, image_dict in enumerate(response['data']):
-        image_data = b64decode(image_dict["b64_json"])
-        images.append(image_data)
-        image_file = DATA_DIR / f"{file_name.stem}-{index}.png"
-        # images[image_file] = image_data
-        with open(image_file, mode="wb") as png:
-            png.write(image_data)
-        insert_narration(image_file, narration)
+#    with open(file_name, mode="w", encoding="utf-8") as file:
+#        json.dump(response, file)
+   
+    #for index, image_dict in enumerate(response['data']):
+    #    image_data = b64decode(image_dict["b64_json"])
+    #    image = image_data
+        #image_file = DATA_DIR / f"{file_name.stem}-{index}.png"
+        #images[image_file] = image_data
+        #with open(image_file, mode="wb") as png:
+        #    png.write(image_data)
 
-    return images
+    return response["data"][0]["url"], prompts
 
 
 def askGPT(text):
@@ -164,9 +249,9 @@ def receiveResponse(panel_response):
             narration = translator.translate_text(match.group(3).strip(), target_lang=detected_language)
 
         panels.append({
-            'panel_number': panel_number,
-            'art': art,
-            'narration': narration,
+            "panel_number": panel_number,
+            "art": art,
+            "narration": narration,
         })
     return panels
 

@@ -8,10 +8,35 @@
 
 {% block content %}
 
-<h1>Jaj bratku</h1>
-
-<script>
-    var images = '{{data}}'
-    console.log(images)
-</script>
+<div id="root">
+    <div style="text-align: right; margin-right: 10%;">
+        <h1>Choose one of the images!</h1>
+    </div>
+        <form method="post" action="" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            {% csrf_token %}
+            <div id="img_options" style="display: flex; justify-content: center;">
+                <button type="submit" name="chosen" value="0">
+                    <img src="{% static 'account/img/current0.jpg' %}">
+                </button>
+                <button type="submit" name="chosen" value="1">
+                    <img src="{% static 'account/img/current1.jpg' %}">
+                </button>
+                <button type="submit" name="chosen" value="2">
+                    <img src="{% static 'account/img/current2.jpg' %}">
+                </button>
+                <button type="submit" name="chosen" value="3">
+                    <img src="{% static 'account/img/current3.jpg' %}">
+                </button>
+                <button type="submit" name="chosen" value="4">
+                    <img src="{% static 'account/img/current4.jpg' %}">
+                </button>
+            </div>
+            <h3>Images were generated based on:</h3>
+            <input type="text" name="prompt" id="promptinput" value="{{prompt}}">
+            <input type="hidden" name="index" value="{{index}}">
+            <input type="hidden" name="panels" value="{{panels}}">
+            <input type="hidden" name="style" value="{{style}}">
+            <button id="first_submit" type="submit">Don't like any of them? Regenerate!</button>
+        </form>
+</div>
 {% endblock %}
