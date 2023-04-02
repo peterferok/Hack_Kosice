@@ -38,28 +38,34 @@ class HomeView(LoginRequiredMixin, View):
 
         prompt = None
 
-        index = int(request.POST.get('index'))
+        index = request.POST.get('index')
         if index == None:
             index = 0
 
         panels = request.POST.get('panels')
         if panels == None:
             panels = main(story, style, hero)
+        else:
+            panels = panels.replace('\'', '"')
+            panels = json.loads(panels)
         
-        for _ in range(5):
+        for i in range(5):
+            print(panels)
+            print(style)
             print(index)
-            print(type(index))
-            data, prompt = getImage(panels[0]['art']+" in a "+style+" style no text",OPENAI_API_KEY)
+            data, prompt = getImage(panels[int(index)]['art']+" in a "+style+" style no text", OPENAI_API_KEY)
             
             img_data = requests.get(data).content
             with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'wb') as handler:
                 handler.write(img_data)
+            
+            insert_narration('~/../account/static/account/img/current' + str(i) + '.jpg', panels[int(index)]['narration'])
         
-        return render(request, "main/images.html", {'prompt': prompt, 'index': index, 'panels': panels})
+        return render(request, "main/images.html", {'prompt': prompt, 'index': index, 'panels': panels, 'style': style})
     
 
 def insert_narration(image_path, text):
-    narration_box_path = 'resources/narrationbox.png'
+    narration_box_path = '~/../account/static/account/img/narrationbox.png'
 
     # Load the image from file
     narration_image = Image.open(narration_box_path)
@@ -110,12 +116,14 @@ def insert_narration(image_path, text):
 
     # Save the combined image
     combined_image.save(image_path, 'PNG')
+
+
 class ImagesView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, "main/images.html", {})
         
 
-def getImage(prompts, narration, apiKey):
+def getImage(prompts, apiKey):
     DATA_DIR = Path.cwd() / "responses"
 
     DATA_DIR.mkdir(exist_ok=True)
@@ -127,8 +135,6 @@ def getImage(prompts, narration, apiKey):
         n=1,
         size="256x256"
     )
-    print("ajajajaj")
-    print(prompts)
 
     #file_name = DATA_DIR / f"{prompts[:1]}-{response['created']}.json"
 

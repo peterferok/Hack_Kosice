@@ -34,12 +34,8 @@
             <input type="text" name="prompt" id="promptinput" value="{{prompt}}">
             <input type="hidden" name="index" value="{{index}}">
             <input type="hidden" name="panels" value="{{panels}}">
-            <button type="submit">Don't like any of them? Regenerate!</button>
+            <input type="hidden" name="style" value="{{style}}">
+            <button id="first_submit" type="submit">Don't like any of them? Regenerate!</button>
         </form>
 </div>
-
-
-<script>
-    console.log(document.getElementByName('index').value)
-</script>
 {% endblock %}
