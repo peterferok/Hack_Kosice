@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+import cv2
+import numpy as np
 import json
 import os
 from pathlib import Path
@@ -25,6 +27,28 @@ detected_language = ''
 
 
 # Create your views here.
+class FinalView(LoginRequiredMixin, View):
+    login_url = '/account'
+
+    def get(self, request):
+        img1 = cv2.imread('~/../account/static/account/img/actual0.jpg')
+        img2 = cv2.imread('~/../account/static/account/img/actual1.jpg')
+        img3 = cv2.imread('~/../account/static/account/img/actual2.jpg')
+        img4 = cv2.imread('~/../account/static/account/img/actual3.jpg')
+        img5 = cv2.imread('~/../account/static/account/img/actual4.jpg')
+        end = cv2.imread('~/../account/static/account/img/end_chapter.jpg')
+
+        resized_end = cv2.resize(end,(img5.shape[1],img5.shape[0]))
+        #print(resized_end.shape)
+        #print(img1.shape)
+        im_h1 = cv2.hconcat([img1, img2])
+        im_h2 = cv2.hconcat([img3, img4])
+        im_h3 = cv2.hconcat([img5,resized_end])
+        im_v = cv2.vconcat([im_h1, im_h2,im_h3])
+        cv2.imwrite('~/../account/static/account/img/Concat_images.jpg', im_v)
+        return render(request, "main/final.html", {})
+
+
 class HomeView(LoginRequiredMixin, View):
     login_url = '/account'
 
@@ -45,13 +69,21 @@ class HomeView(LoginRequiredMixin, View):
         else:
             index = int(index)
             if index >= 5:
-                return HttpResponse("You did it!")
+                return redirect('final/')
 
         panels = request.POST.get('panels')
         if panels == None:
             panels = main(story, style, hero)
         else:
             panels = panels.replace('\'', '"')
+            for i in range(len(panels)):
+                if panels[i] == '"':
+                    if panels[i+1] in ['s', 'd', 'r'] and i != 0:
+                        if panels[i-1] not in [' ', '{']:
+                            temp = list(panels)
+                            temp[i] = ' '
+                            panels = ''.join(temp)
+            print(panels)
             panels = json.loads(panels)
     
         chosen = request.POST.get('chosen')
