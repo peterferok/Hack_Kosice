@@ -35,12 +35,14 @@ class HomeView(LoginRequiredMixin, View):
         story = request.POST.get('story')
         hero = request.POST.get('hero')
         style = request.POST.get('style')
-
-        prompt = None
+        my_prompt = None
+        prompt = request.POST.get('prompt')
 
         index = request.POST.get('index')
         if index == None:
             index = 0
+        else:
+            index = int(index)
 
         panels = request.POST.get('panels')
         if panels == None:
@@ -48,12 +50,37 @@ class HomeView(LoginRequiredMixin, View):
         else:
             panels = panels.replace('\'', '"')
             panels = json.loads(panels)
-        
-        for i in range(5):
-            print(panels)
-            print(style)
+    
+        chosen = request.POST.get('chosen')
+        if chosen != None:
+            for i in range(5):
+                if i != int(chosen):
+                    try:
+                        os.remove('~/../account/static/account/img/current' + str(i) + '.jpg')
+                    except FileNotFoundError:
+                        pass
+                else:
+                    img_data = None
+                    with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'rb') as handler:
+                        img_data = handler.read()
+                    try:
+                        os.remove('~/../account/static/account/img/current' + str(i) + '.jpg')
+                    except FileNotFoundError:
+                        pass
+                    with open('~/../account/static/account/img/actual' + str(index) + '.jpg', 'wb') as handler:
+                        handler.write(img_data)
+            index += 1
+            prompt = None
+
+        if prompt is not None:
+            my_prompt = prompt + " in a "+style+" style no text"
+        else:
             print(index)
-            data, prompt = getImage(panels[int(index)]['art']+" in a "+style+" style no text", OPENAI_API_KEY)
+            my_prompt = panels[index]['art']+" in a "+style+" style no text"
+
+
+        for i in range(5):
+            data, prompt = getImage(my_prompt, OPENAI_API_KEY)
             
             img_data = requests.get(data).content
             with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'wb') as handler:
@@ -187,9 +214,9 @@ def receiveResponse(panel_response):
             narration = translator.translate_text(match.group(3).strip(), target_lang=detected_language)
 
         panels.append({
-            'panel_number': panel_number,
-            'art': art,
-            'narration': narration,
+            "panel_number": panel_number,
+            "art": art,
+            "narration": narration,
         })
     return panels
 
