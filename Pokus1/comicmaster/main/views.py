@@ -17,10 +17,12 @@ import torch
 from torchvision import transforms
 import re
 import base64
+import requests
 
 OPENAI_API_KEY = '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'
 DEEPL_KEY = 'e99c10de-a8be-0424-85e8-3e4a485c0755:fx'
 responses = []
+
 
 # Create your views here.
 class HomeView(LoginRequiredMixin, View):
@@ -30,21 +32,36 @@ class HomeView(LoginRequiredMixin, View):
         return render(request, "main/home.html", {})
     
     def post(self, request):
-        story = request.POST['story']
-        hero = request.POST['hero']
-        style = request.POST['style']
-        panels = main(story, style, hero)
+        story = request.POST.get('story')
+        hero = request.POST.get('hero')
+        style = request.POST.get('style')
 
-        response = []
+        prompt = None
+
+        index = int(request.POST.get('index'))
+        if index == None:
+            index = 0
+
+        panels = request.POST.get('panels')
+        if panels == None:
+            panels = main(story, style, hero)
         
-        for panel in panels:
-            response.append(getImage(panel['art']+" in a "+style+" style no text",OPENAI_API_KEY)) 
-
-
-        return render(request, "main/images.html", {'data': response})
+        for _ in range(5):
+            print(index)
+            print(type(index))
+            data, prompt = getImage(panels[0]['art']+" in a "+style+" style no text",OPENAI_API_KEY)
+            
+            img_data = requests.get(data).content
+            with open('~/../account/static/account/img/current' + str(i) + '.jpg', 'wb') as handler:
+                handler.write(img_data)
+        
+        return render(request, "main/images.html", {'prompt': prompt, 'index': index, 'panels': panels})
     
 
-
+class ImagesView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, "main/images.html", {})
+        
 
 def getImage(prompts,apiKey):
     DATA_DIR = Path.cwd() / "responses"
@@ -55,24 +72,26 @@ def getImage(prompts,apiKey):
 
     response = openai.Image.create(
         prompt=prompts,
-        n=5,
-        size="256x256",
-        response_format="b64_json",
+        n=1,
+        size="256x256"
     )
+    print("ajajajaj")
+    print(prompts)
 
-    file_name = DATA_DIR / f"{prompts[:5]}-{response['created']}.json"
+    #file_name = DATA_DIR / f"{prompts[:1]}-{response['created']}.json"
 
 #    with open(file_name, mode="w", encoding="utf-8") as file:
 #        json.dump(response, file)
-    images = []
-    for index, image_dict in enumerate(response['data']):
-        image_data = b64decode(image_dict["b64_json"])
-        images.append(image_data)
-        image_file = DATA_DIR / f"{file_name.stem}-{index}.png"
+   
+    #for index, image_dict in enumerate(response['data']):
+    #    image_data = b64decode(image_dict["b64_json"])
+    #    image = image_data
+        #image_file = DATA_DIR / f"{file_name.stem}-{index}.png"
         #images[image_file] = image_data
-        with open(image_file, mode="wb") as png:
-            png.write(image_data)
-    return images
+        #with open(image_file, mode="wb") as png:
+        #    png.write(image_data)
+
+    return response["data"][0]["url"], prompts
 
 
 def askGPT(text):

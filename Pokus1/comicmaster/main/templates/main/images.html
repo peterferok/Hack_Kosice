@@ -8,10 +8,38 @@
 
 {% block content %}
 
-<h1>Jaj bratku</h1>
+<div id="root">
+    <div style="text-align: right; margin-right: 10%;">
+        <h1>Choose one of the images!</h1>
+    </div>
+        <form method="post" action="" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            {% csrf_token %}
+            <div id="img_options" style="display: flex; justify-content: center;">
+                <button>
+                    <img src="{% static 'account/img/current0.jpg' %}">
+                </button>
+                <button>
+                    <img src="{% static 'account/img/current1.jpg' %}">
+                </button>
+                <button>
+                    <img src="{% static 'account/img/current2.jpg' %}">
+                </button>
+                <button>
+                    <img src="{% static 'account/img/current3.jpg' %}">
+                </button>
+                <button>
+                    <img src="{% static 'account/img/current4.jpg' %}">
+                </button>
+            </div>
+            <input type="text" name="prompt" id="promptinput" value="{{prompt}}">
+            <input type="hidden" name="index" value="{{index}}">
+            <input type="hidden" name="panels" value="{{panels}}">
+            <button type="submit">Don't like any of them? Regenerate!</button>
+        </form>
+</div>
+
 
 <script>
-    var images = '{{data}}'
-    console.log(images)
+    console.log(document.getElementByName('index').value)
 </script>
 {% endblock %}

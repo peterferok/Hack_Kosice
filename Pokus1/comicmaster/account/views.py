@@ -23,6 +23,7 @@ class LoginView(View):
             login(request, user)
             return redirect('/')
  
+
 class RegisterView(View):
     def get(self, request):
         return render(request, 'account/register.html')
