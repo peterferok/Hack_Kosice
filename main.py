@@ -81,14 +81,11 @@ def getImage(prompts, narration, apiKey):
 
     file_name = DATA_DIR / f"{prompts[:5]}-{response['created']}.json"
 
-    #    with open(file_name, mode="w", encoding="utf-8") as file:
-    #        json.dump(response, file)
     images = []
     for index, image_dict in enumerate(response['data']):
         image_data = b64decode(image_dict["b64_json"])
         images.append(image_data)
         image_file = DATA_DIR / f"{file_name.stem}-{index}.png"
-        # images[image_file] = image_data
         with open(image_file, mode="wb") as png:
             png.write(image_data)
         insert_narration(image_file, narration)
@@ -121,7 +118,6 @@ def receiveResponse(panel_response):
     panel_pattern = re.compile(r'(\d+):\s*.rt:(.+?)\s*.arration:\s*(.+?)(\n|$)', re.DOTALL)
 
     for match in panel_pattern.finditer(panel_response):
-        print("MATCH\n")
         panel_number = int(match.group(1))
         art = match.group(2).strip()
 
@@ -140,31 +136,16 @@ def receiveResponse(panel_response):
 
 def main():
     Story = "Story: aliens invaded earth\n"
-    # Mood="Story mood: Uplifting\n"
     Comic_style = 'manga'
     Main_character = "Main character: Batman\n"
 
-    # translator = deepl.Translator(DEEPL_KEY)
-    # result = translator.translate_text(Story+Main_character, target_lang='EN-US')
-    # translated_text = result.text
-    # detected_language = result.detected_source_lang
     translated_text = translateText(Story, Main_character)
     myQn = "act as professional story writer, your task is to create a coherent captivating complex superhero story plot based on my input: " + "'" + translated_text + "'"
     story_response = askGPT(myQn)
 
     panel_response = askGPT(
         "Act as a professional comic book writer your task is to create a captivating comic book based on my story. You will divide this book into separate panels, you can make as many panels as the story requires but there have to be at least 6 panels. Your output will look like: \n(panel number) \nArt: (this will be a detailed description of what is happening inside the panel, what characters are there and what is in the background)\nNarration: (description of what is happening in the panel or backstory that led to it)\n\nthe story you are making a comic book for is:\n" + "'" + story_response + "'")
-    # panels = []
-    # panel_pattern = re.compile(r'Panel (\d+):\s*Art:(.+?)(?=\n\s*\nPanel|$)', re.DOTALL)
 
-    # for match in panel_pattern.finditer(panel_response):
-    #    panel_number = int(match.group(1))
-    #    art = match.group(2).strip()
-
-    #    panels.append({
-    #        'panel_number': panel_number,
-    #        'art': art,
-    #    })
     for panel in receiveResponse(panel_response):
         getImage(panel['art'] + " in a " + Comic_style + " style no text", panel['narration'], OPENAI_API_KEY)
 
